@@ -1,0 +1,31 @@
+{
+  "name": "motif",
+  "version": "0.1.0",
+  "description": "A library for orchestrating asynchronous flows",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepare": "tsc",
+    "test": "NODE_OPTIONS='--import=tsx' ava"
+  },
+  "type": "module",
+  "keywords": [
+    "async",
+    "await",
+    "flow",
+    "react",
+    "library"
+  ],
+  "author": "Sam Vervaeck",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^18.2.46",
+    "ava": "^6.0.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "ava": {
+    "extensions": {
+      "ts": "commonjs"
+    }
+  }
+}
