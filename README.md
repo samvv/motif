@@ -30,7 +30,8 @@ function* fetchLength(url: string) {
 
 const task = run(fetchLength, 'https://google.com');
 
-// task.cancel();
+// Cancel the task if it hasn't already been
+task.cancel();
 ```
 
 ## Quick Start
