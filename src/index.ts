@@ -66,24 +66,24 @@ export function sleep(ms: number): Motif<void> {
 const noop = () => {};
 
 export function run<T>(generator: Motif<T>): Task<T> {
+  let cancelled = false;
   let cancelFn: CancelFn = noop;
-  const promise = new Promise<T>((accept, reject) => {
-    const visit = (result: any) => {
-      if (result.done) {
-        accept(result.value);
-        return;
-      }
-      const task = runEffect(result.value);
-      cancelFn = task.cancel.bind(task);
-      task.promise
-        .then(toYield => {
-          visit(generator.next(toYield));
-        })
-        .catch(reject);
+  const visit = (result: IteratorResult<any>): any => {
+    if (result.done) {
+      return result.value;
     }
-    visit(generator.next());
-  });
-  const cancel = () => { cancelFn(); }
+    const task = runEffect(result.value);
+    cancelFn = task.cancel.bind(task);
+    return task.promise
+      .then(toYield => {
+        if (cancelled) {
+          return;
+        }
+        return visit(generator.next(toYield));
+      });
+  }
+  const promise = visit(generator.next());
+  const cancel = () => { cancelled = true; cancelFn(); }
   return new Task(promise, cancel);
 }
 
