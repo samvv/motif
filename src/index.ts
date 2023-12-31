@@ -52,7 +52,7 @@ export function delay(ms: number): Motif<void> {
       return [
         new Promise((accept, reject) => {
           rejectFn = reject;
-          timer = setTimeout(() => accept, ms);
+          timer = setTimeout(accept, ms);
         }),
         () => {
           clearTimeout(timer);
