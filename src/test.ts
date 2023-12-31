@@ -1,27 +1,29 @@
 
 import test from "ava"
-import { Motif, delay, runEffect, fetch, run } from ".";
+import { Motif, delay, fetch, run, AbortError } from ".";
 
-test("can cancel a Promise-based effect", t => {
-  return new Promise(accept => {
-    function* foo() {
-      yield* delay(5000);
-      t.fail();
-    }
-    const iter = foo();
-    const task = runEffect(iter.next().value!)
-    task.cancel();
-    t.pass();
-    accept();
-  });
+test("can evaluate a delay effect", async (t) => {
+  function* foo() {
+    yield* delay(1000);
+  }
+  const task = run(foo());
+  t.pass();
+  return task.promise;
 });
 
-test("can evaluate a Promise-based effect", async (t) => {
+test("can cancel a delay effect", async (t) => {
   function* foo() {
-    yield* delay(5000);
+    yield* delay(1000);
+    t.fail();
   }
-  const iter = foo();
-  const task = runEffect(iter.next().value!)
+  const task = run(foo());
+  t.plan(2);
+  const promise = task.promise.catch(error => {
+    console.log('error');
+    t.assert(error instanceof AbortError);
+  })
+  task.cancel();
+  await promise;
   t.pass();
 });
 
@@ -33,14 +35,21 @@ test("can fetch from a web resource", t => {
   return run(foo()).promise;
 });
 
-test("can cancel fetching from a web resource", t => {
+test("can cancel fetching from a web resource", async (t) => {
   function* foo(): Motif<any> {
     const response = yield* fetch('https://google.com');
     t.fail();
   }
   const task = run(foo());
-  task.cancel();
-  t.assert(task.value === undefined);
+  t.plan(2);
+  // task.promise.catch(error => {
+  // })
+  try {
+    task.cancel();
+    await task.promise;
+  } catch (error) {
+    t.assert(error instanceof AbortError);
+  }
   t.pass();
 });
 
