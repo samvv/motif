@@ -53,6 +53,12 @@ test("can cancel fetching from a web resource", async (t) => {
   t.pass();
 });
 
+test('can run the sleep effect directly', async (t) => {
+  const task = run(sleep, 100);
+  t.assert(await task.promise === undefined);
+  t.pass()
+});
+
 test("the example in the README works", async (t) => {
   function* fetchLength(url: string) {
     yield* sleep(1000);
