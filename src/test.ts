@@ -53,3 +53,19 @@ test("can cancel fetching from a web resource", async (t) => {
   t.pass();
 });
 
+test("the example in the README works", async (t) => {
+  function* fetchLength(url: string) {
+    yield* sleep(1000);
+    const response = yield* fetch(url);
+    if (response.status !== 200) {
+      throw new Error(`Wrong status code`);
+    }
+    const text = yield* promised(response.text());
+    return text.length;
+  }
+  const task = run(fetchLength, 'https://google.com');
+  const len = await task.promise;
+  task.cancel();
+  t.pass();
+});
+
