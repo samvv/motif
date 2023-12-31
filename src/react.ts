@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Task, TaskState } from "./task";
-import { Motif, runEffect } from ".";
+import { Motif } from ".";
 
 export function useMotif<T>(proc: () => Motif<T>): [TaskState, T | undefined] {
 
@@ -21,7 +21,7 @@ export function useMotif<T>(proc: () => Motif<T>): [TaskState, T | undefined] {
           setResult(value);
           return;
         }
-        curr = runEffect(value);
+        curr = value;
         input = await curr.promise;
       }
     })();
