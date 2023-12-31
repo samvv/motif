@@ -1,12 +1,12 @@
 
 import test from "ava"
-import { Motif, sleep, fetch, run, AbortError } from ".";
+import { Motif, sleep, fetch, run, AbortError, promised } from ".";
 
 test("can evaluate a delay effect", async (t) => {
   function* foo() {
     yield* sleep(1000);
   }
-  const task = run(foo());
+  const task = run(foo);
   t.pass();
   return task.promise;
 });
@@ -16,7 +16,7 @@ test("can cancel a delay effect", async (t) => {
     yield* sleep(1000);
     t.fail();
   }
-  const task = run(foo());
+  const task = run(foo);
   t.plan(2);
   const promise = task.promise.catch(error => {
     console.log('error');
@@ -32,7 +32,7 @@ test("can fetch from a web resource", t => {
     const response = yield* fetch('https://google.com');
     t.assert(response!.status === 200);
   }
-  return run(foo()).promise;
+  return run(foo).promise;
 });
 
 test("can cancel fetching from a web resource", async (t) => {
@@ -40,7 +40,7 @@ test("can cancel fetching from a web resource", async (t) => {
     const response = yield* fetch('https://google.com');
     t.fail();
   }
-  const task = run(foo());
+  const task = run(foo);
   t.plan(2);
   // task.promise.catch(error => {
   // })

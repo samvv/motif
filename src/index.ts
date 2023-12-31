@@ -72,7 +72,8 @@ export function sleep(ms: number): Motif<void> {
 
 const noop = () => {};
 
-export function run<T>(generator: Motif<T>): Task<T> {
+export function run<T, Args extends any[]>(proc: (...args: Args) => Motif<T>, ...args: Args): Task<T> {
+  const generator = proc(...args);
   let cancelled = false;
   let cancelFn: CancelFn = noop;
   const visit = (result: IteratorResult<any>): any => {
