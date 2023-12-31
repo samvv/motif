@@ -75,10 +75,11 @@ export function run<T>(generator: Motif<T>): Task<T> {
       }
       const task = runEffect(result.value);
       cancelFn = task.cancel.bind(task);
-      task.promise.catch(reject);
-      task.promise.then(toYield => {
-        visit(generator.next(toYield));
-      });
+      task.promise
+        .then(toYield => {
+          visit(generator.next(toYield));
+        })
+        .catch(reject);
     }
     visit(generator.next());
   });
