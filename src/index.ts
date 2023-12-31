@@ -26,7 +26,14 @@ export function* callWithAbortFn<Args extends any[], T>(proc: (...args: Args) =>
 export function* call<Args extends any[], T>(proc: (...args: Args) => Promise<T>, ...args: Args): Motif<T> {
   return yield {
     type: 'promise',
-    run: () => [ proc(...args), () => {} ],
+    run: () => [ proc(...args), noop ],
+  };
+}
+
+export function* promised<T>(promise: Promise<T>): Motif<T> {
+  return yield {
+    type: 'promise',
+    run: () => [ promise, noop ],
   };
 }
 
