@@ -63,8 +63,10 @@ export function delay(ms: number): Motif<void> {
   );
 }
 
+const noop = () => {};
+
 export function run<T>(generator: Motif<T>): Task<T> {
-  let cancelFn: CancelFn;
+  let cancelFn: CancelFn = noop;
   const promise = new Promise<T>((accept, reject) => {
     const visit = (result: any) => {
       if (result.done) {
