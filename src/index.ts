@@ -41,7 +41,7 @@ const nativeFetch = (typeof window !== 'undefined' ? window : globalThis).fetch;
 
 export class AbortError extends Error {}
 
-export function fetch(input: RequestInfo | URL, init?: RequestInit): Motif<Response | void> {
+export function fetch(input: RequestInfo | URL, init?: RequestInit): Motif<Response> {
   return callWithAbortFn(() => {
     const controller = new AbortController();
     return [
