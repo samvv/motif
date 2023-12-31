@@ -1,40 +1,22 @@
 import { Task } from "./task";
 import { CancelFn, RejectFn } from "./types";
-import { assertNever } from "./util";
 
-export type Motif<T> = Generator<Effect, T, T>;
+export type Motif<T> = Generator<Action, T, T>;
 
-interface EffectBase {
-  type: string;
-}
-
-interface PromiseEffect extends EffectBase {
-  type: 'promise';
-  run: () => [ Promise<any>, CancelFn ],
-}
-
-export type Effect
-  = PromiseEffect
+type Action = Task<any>;
 
 export function* callWithAbortFn<Args extends any[], T>(proc: (...args: Args) => [ Promise<T>, CancelFn ], ...args: Args): Motif<T> {
-  return yield {
-    type: 'promise',
-    run: () => proc(...args),
-  };
+  const [promise, cancel] = proc(...args);
+  return yield new Task<T>(promise, cancel);
 }
 
 export function* call<Args extends any[], T>(proc: (...args: Args) => Promise<T>, ...args: Args): Motif<T> {
-  return yield {
-    type: 'promise',
-    run: () => [ proc(...args), noop ],
-  };
+  const promise = proc(...args);
+  return yield new Task<T>(promise, noop);
 }
 
 export function* promised<T>(promise: Promise<T>): Motif<T> {
-  return yield {
-    type: 'promise',
-    run: () => [ promise, noop ],
-  };
+  return yield new Task(promise, noop);
 }
 
 const nativeFetch = (typeof window !== 'undefined' ? window : globalThis).fetch;
@@ -73,40 +55,25 @@ export function sleep(ms: number): Motif<void> {
 const noop = () => {};
 
 export function run<T, Args extends any[]>(proc: (...args: Args) => Motif<T>, ...args: Args): Task<T> {
-  const generator = proc(...args);
+  const iterator = proc(...args);
   let cancelled = false;
   let cancelFn: CancelFn = noop;
-  const visit = (result: IteratorResult<any>): any => {
+  const visit = (result: IteratorResult<Action>): any => {
     if (result.done) {
       return result.value;
     }
-    const task = runEffect(result.value);
+    const task = result.value;
     cancelFn = task.cancel.bind(task);
     return task.promise
       .then(toYield => {
         if (cancelled) {
           return;
         }
-        return visit(generator.next(toYield));
+        return visit(iterator.next(toYield));
       });
   }
-  const promise = visit(generator.next());
+  const promise = visit(iterator.next());
   const cancel = () => { cancelled = true; cancelFn(); }
   return new Task(promise, cancel);
-}
-
-export function runEffect(effect: Effect): Task {
-
-  switch (effect.type) {
-
-    case 'promise':
-      const [promise, cancel] = effect.run();
-      return new Task(promise, cancel);
-
-    default:
-      assertNever(effect.type);
-
-  }
-
 }
 
