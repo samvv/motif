@@ -17,13 +17,14 @@ test("can cancel a delay effect", async (t) => {
     t.fail();
   }
   const task = run(foo);
-  t.plan(2);
+  t.plan(3);
   const promise = task.promise.catch(error => {
     console.log('error');
     t.assert(error instanceof AbortError);
   })
   task.cancel();
-  await promise;
+  const val = await promise;
+  t.assert(val === undefined);
   t.pass();
 });
 
@@ -41,16 +42,15 @@ test("can cancel fetching from a web resource", async (t) => {
     t.fail();
   }
   const task = run(foo);
-  t.plan(2);
-  // task.promise.catch(error => {
-  // })
   try {
     task.cancel();
     await task.promise;
   } catch (error) {
     t.assert(error instanceof AbortError);
+    t.pass();
+    return;
   }
-  t.pass();
+  t.fail();
 });
 
 test('can run the sleep effect directly', async (t) => {
@@ -71,6 +71,7 @@ test("the example in the README works", async (t) => {
   }
   const task = run(fetchLength, 'https://google.com');
   const len = await task.promise;
+  t.assert(typeof(len) === 'number');
   task.cancel();
   t.pass();
 });
