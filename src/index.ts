@@ -44,7 +44,7 @@ export function fetch(input: RequestInfo | URL, init?: RequestInit): Motif<Respo
   });
 }
 
-export function delay(ms: number): Motif<void> {
+export function sleep(ms: number): Motif<void> {
   return callWithAbortFn(
     () => {
       let timer: any;

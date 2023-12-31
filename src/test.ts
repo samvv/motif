@@ -1,10 +1,10 @@
 
 import test from "ava"
-import { Motif, delay, fetch, run, AbortError } from ".";
+import { Motif, sleep, fetch, run, AbortError } from ".";
 
 test("can evaluate a delay effect", async (t) => {
   function* foo() {
-    yield* delay(1000);
+    yield* sleep(1000);
   }
   const task = run(foo());
   t.pass();
@@ -13,7 +13,7 @@ test("can evaluate a delay effect", async (t) => {
 
 test("can cancel a delay effect", async (t) => {
   function* foo() {
-    yield* delay(1000);
+    yield* sleep(1000);
     t.fail();
   }
   const task = run(foo());
